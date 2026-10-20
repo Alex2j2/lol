@@ -1,0 +1,142 @@
+import 'dart:async';
+import 'package:flutter/cupertino.dart';
+
+void main() => runApp(const MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const CupertinoApp(
+      title: 'My Application',
+      debugShowCheckedModeBanner: false,
+      theme: CupertinoThemeData(
+        primaryColor: Color(0xFFE65100),
+      ),
+      home: PantallaPrincipal(),
+    );
+  }
+}
+
+class PantallaPrincipal extends StatefulWidget {
+  const PantallaPrincipal({super.key});
+
+  @override
+  State<PantallaPrincipal> createState() => _PantallaPrincipalState();
+}
+
+class _PantallaPrincipalState extends State<PantallaPrincipal> {
+  // Variables de estado
+  final TextEditingController _controller = TextEditingController(); // lo que se escribe
+  String nombreMostrado = ''; // lo que se muestra abajo
+  bool pequena = false;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Cada 5 segundos cambia entre pequeña y normal
+    _timer = Timer.periodic(const Duration(seconds: 5), (_) {
+      setState(() => pequena = !pequena);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const naranja = Color(0xFFE65100);
+
+    return CupertinoPageScaffold(
+      backgroundColor: const Color(0xFFFFF3E0), // color de fondo
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('My Application'),
+        backgroundColor: Color(0xFFFFE0B2),
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              // 1. Texto con decoración
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+                decoration: BoxDecoration(
+                  border: Border.all(color: naranja, width: 2),
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: const Text(
+                  'Hola',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: naranja,
+                    decoration: TextDecoration.underline,
+                    decorationColor: naranja,
+                  ),
+                ),
+              ),
+
+              // 2. Imagen con tamaño animado (100 pequeña / 250 normal)
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.easeInOut,
+                width: pequena ? 100 : 250,
+                height: pequena ? 100 : 250,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.asset(
+                    'assets/images/gato_meme.png',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+
+              // 3. Entrada de texto + botón
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: CupertinoTextField(
+                      controller: _controller,
+                      placeholder: 'Nombre',
+                      maxLines: 1,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.white,
+                        border: Border.all(color: naranja),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  CupertinoButton.filled(
+                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                    onPressed: () {
+                      setState(() => nombreMostrado = _controller.text);
+                    },
+                    child: const Text('✔'),
+                  ),
+                ],
+              ),
+
+              // 4. Texto que muestra la variable
+              Text(
+                nombreMostrado,
+                style: const TextStyle(fontSize: 28),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
